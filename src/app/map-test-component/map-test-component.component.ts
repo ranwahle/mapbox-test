@@ -1,9 +1,15 @@
 import {AfterViewInit, Component, ElementRef, Input, OnInit} from '@angular/core';
-import mapboxgl, { Marker } from 'mapbox-gl'; // or "const mapboxgl = require('mapbox-gl');"
+import mapboxgl, { Marker } from 'mapbox-gl';
 
 import  {Map} from 'mapbox-gl';
 
 export interface Coordinate {lat:number; lng: number;}
+
+export type MapTypes = 'streets' | 'satelite';
+const mapStylesDict: {[key in MapTypes]: string} = {
+  streets: 'mapbox://styles/mapbox/streets-v11',
+  satelite: '',
+}
 
 @Component({
   selector: 'app-map-test-component',
@@ -14,8 +20,9 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
 
   map: any;
   @Input() markerColor: string  ='#000000'
-  @Input() center: Coordinate = {lat: 35.5,lng: 36.5};
-  @Input() zoom: number = 9;
+  @Input() center: Coordinate = {lat: 30.267966495765137,lng: 35};
+  @Input() zoom: number = 19;
+  @Input() mapType: MapTypes = 'streets';
   @Input() polygon: {
     name: string,
     coordinates: Coordinate[]
@@ -26,13 +33,16 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
 
   @Input() markers: Coordinate[] = [];
 
+  @Input() accessToken: string = '';
+
   ngOnInit(): void {
-    mapboxgl.accessToken = 'pk.eyJ1IjoicmFud2FobGUiLCJhIjoiY2t2MHYxaDFzMGk3dDJ1cGExbTc5NjV0NyJ9.iZ8DjuvhkCxtUNZ_bA6FAw';
+
+    mapboxgl.accessToken = this.accessToken;
     const map = new mapboxgl.Map({
-      center: this.markers[0],// {lat: this.center.lat,lng: this.center.lng},
+      center: this.markers[0],
       zoom: this.zoom,
     container: 'map', // container ID
-    style: 'mapbox://styles/mapbox/satellite-v9', // style URL
+    style: mapStylesDict[this.mapType]
 
     });
 
@@ -42,6 +52,13 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
       this.markers.map(m => new Marker({color: this.markerColor, draggable: true }).setLngLat({lng: m.lng,lat: m.lat})).forEach(marker => {
         marker.addTo(this.map);
       });
+
+      const {coordinates} = this.polygon;
+
+      if (coordinates[0]?.lng !== coordinates[coordinates.length]?.lng ||
+        coordinates[0]?.lat !== coordinates[coordinates.length]?.lat ) {
+        coordinates.push({...coordinates[0]});
+      }
 
       map.addSource(this.polygon.name, {
         type: 'geojson',
