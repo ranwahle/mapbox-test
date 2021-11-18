@@ -1,5 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Input, OnInit} from '@angular/core';
 import mapboxgl, { Marker } from 'mapbox-gl';
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 import  {Map} from 'mapbox-gl';
 
@@ -97,6 +98,19 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
         }
       });
 
+
+      const draw = new MapboxDraw({
+        displayControlsDefault: false,
+// Select which mapbox-gl-draw control buttons to add to the map.
+        controls: {
+          polygon: true,
+          trash: true
+        },
+// Set mapbox-gl-draw to draw by default.
+// The user does not have to click the polygon control button first.
+        defaultMode: 'draw_polygon'
+      });
+      map.addControl(draw);
 
 
       //
