@@ -3,13 +3,14 @@ import mapboxgl, { Marker } from 'mapbox-gl';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 import  {Map} from 'mapbox-gl';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
 export interface Coordinate {lat:number; lng: number;}
 
-export type MapTypes = 'streets' | 'satelite';
+export type MapTypes = 'streets' | 'satellite';
 const mapStylesDict: {[key in MapTypes]: string} = {
   streets: 'mapbox://styles/mapbox/streets-v11',
-  satelite: '',
+  satellite: 'mapbox://styles/mapbox/satellite-v9',
 }
 
 @Component({
@@ -24,10 +25,17 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
   @Input() center: Coordinate = {lat: 30.267966495765137,lng: 35};
   @Input() zoom: number = 19;
   @Input() mapType: MapTypes = 'streets';
+
+
+  @Input() set search(value: string) {
+    this.geoCoder?.setInput(value);
+  }
+
   @Input() polygon: {
     name: string,
     coordinates: Coordinate[]
   } = {name: 'poly', coordinates: []}
+  geoCoder: MapboxGeocoder | undefined;
   constructor(private el: ElementRef) {
   }
 
@@ -38,16 +46,30 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
 
+
+
     mapboxgl.accessToken = this.accessToken;
     const map = new mapboxgl.Map({
       center: this.markers[0],
       zoom: this.zoom,
+    
     container: 'map', // container ID
     style: mapStylesDict[this.mapType]
 
     });
 
     this.map = map;
+
+    this.geoCoder = new MapboxGeocoder({
+      accessToken: this.accessToken,
+      mapboxgl: this.map
+    }) 
+
+    this.geoCoder.on('loading', (evt) => {
+      console.log('input', evt);
+    })
+
+    map.addControl(this.geoCoder);
     this.map.on('click', console.log);
     this.map.on('load', () => {
       this.markers.map(m => new Marker({color: this.markerColor, draggable: true }).setLngLat({lng: m.lng,lat: m.lat})).forEach(marker => {

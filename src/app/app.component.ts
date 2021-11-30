@@ -32,4 +32,9 @@ export class AppComponent {
   }
 
   accessToken = config.token;
+  locationSearch: string = '';
+
+  onSearch(search: string) {
+    this.locationSearch = search;
+  }
 }
