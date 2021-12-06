@@ -33,8 +33,14 @@ export class AppComponent {
 
   accessToken = config.token;
   locationSearch: string = '';
+  center: Coordinate = {lat: 0, lng: 0};
 
   onSearch(search: string) {
     this.locationSearch = search;
+  }
+
+  onCenterFound(center: {lat: number, lng: number}) {
+    console.log('center', center);
+    this.center = center;
   }
 }

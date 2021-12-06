@@ -20,9 +20,18 @@ const mapStylesDict: {[key in MapTypes]: string} = {
 })
 export class MapTestComponentComponent implements OnInit, AfterViewInit {
 
-  map: any;
+  map: Map | null = null;
   @Input() markerColor: string  ='#000000'
-  @Input() center: Coordinate = {lat: 30.267966495765137,lng: 35};
+  private _center: Coordinate = {lat: 30.267966495765137,lng: 35};
+  get center(): Coordinate {
+    return this._center;
+  }
+
+
+  @Input() set center(value) {
+    this._center = value;
+    this.map?.setCenter(value);
+  } 
   @Input() zoom: number = 19;
   @Input() mapType: MapTypes = 'streets';
 
@@ -73,7 +82,7 @@ export class MapTestComponentComponent implements OnInit, AfterViewInit {
     this.map.on('click', console.log);
     this.map.on('load', () => {
       this.markers.map(m => new Marker({color: this.markerColor, draggable: true }).setLngLat({lng: m.lng,lat: m.lat})).forEach(marker => {
-        marker.addTo(this.map);
+        marker.addTo(this.map as Map);
       });
 
       const {coordinates} = this.polygon;

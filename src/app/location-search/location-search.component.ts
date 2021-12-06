@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
 const MapblxGlApiUrl = 'https://api.mapbox.com'
@@ -8,11 +8,12 @@ const MapblxGlApiUrl = 'https://api.mapbox.com'
   templateUrl: './location-search.component.html',
   styleUrls: ['./location-search.component.scss']
 })
-export class LocationSearchComponent implements OnInit {
+export class LocationSearchComponent implements AfterViewInit {
 
   @Input() accessToken: string = '';
 
   @Output() search = new EventEmitter<string>();
+  @Output() centerFound = new EventEmitter<{lat: number, lng: number}>();
 
   constructor(private el: ElementRef) { }
 
@@ -21,8 +22,21 @@ export class LocationSearchComponent implements OnInit {
    this.search.emit(value);
   }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
 
+    const geoCoder = new MapboxGeocoder({
+      accessToken: this.accessToken,
+      types: 'country,region,place,postcode,locality,neighborhood'
+    })
+
+    geoCoder.addTo('#geocoder');
+
+    geoCoder.on('result', result => {
+      const [lng, lat] = result.result.center;
+      const newCenter = {lat, lng}
+      this.centerFound.emit(newCenter);
+    });
+    
    
   }
 

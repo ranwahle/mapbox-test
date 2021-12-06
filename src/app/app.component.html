@@ -1,4 +1,5 @@
-<app-map-test-component id="map-container" [mapType]="'satellite'" [markers]="markers" [search]="locationSearch"
+<app-map-test-component id="map-container" [mapType]="'satellite'" [center]="center" [markers]="markers" [search]="locationSearch"
 [polygon]="polygon" [accessToken]="accessToken"></app-map-test-component>
 
-<app-location-search [accessToken]="accessToken" id="geocoder-container" (search)="onSearch($event)"></app-location-search>
+<app-location-search [accessToken]="accessToken" id="geocoder-container" (search)="onSearch($event)"
+(centerFound)="onCenterFound($event)" ></app-location-search>
